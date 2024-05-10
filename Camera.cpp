@@ -30,7 +30,6 @@ void Camera::Matrix(Shader& shader, const char* uniform)
 }
 
 
-
 void Camera::Inputs(GLFWwindow* window)
 {
 	// Handles key inputs

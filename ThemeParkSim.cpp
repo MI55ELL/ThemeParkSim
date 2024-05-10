@@ -1,7 +1,7 @@
-﻿
-
-#include"Mesh.h"
-
+﻿// one sec then lemme get it back and just add new 
+#include"ModelMesh.h"
+#include"mesh.h"
+#include"Model.h"
 
 
 
@@ -135,7 +135,7 @@ int main()
 	// Generates Shader object using shaders default.vert and default.frag
 	Shader shaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
 	Shader skyBoxShader("resources/shaders/skyBox.vert", "resources/shaders/skyBox.frag");
-
+	Shader modelShader("resources/shaders/modelShader.vert", "resources/shaders/modelShader.frag");
 	// Store mesh data in vectors for the mesh
 	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
 	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
@@ -152,8 +152,6 @@ int main()
 	std::vector <GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
 	// Create light mesh
 	Mesh light(lightVerts, lightInd, tex);
-
-
 
 
 
@@ -178,6 +176,13 @@ int main()
 
 	skyBoxShader.Activate();
 	glUniform1i(glGetUniformLocation(skyBoxShader.ID, "skyBox"), 0);
+
+	modelShader.Activate();
+	glUniformMatrix4fv(glGetUniformLocation(modelShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
+
+	// model loading 
+	stbi_set_flip_vertically_on_load(true);
+	Model backpack("resources/models/dragon/DragonModel.obj");
 
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
@@ -282,7 +287,9 @@ int main()
 		// Draws different meshes
 		floor.Draw(shaderProgram, camera);
 		//light.Draw(lightShader, camera);
-
+		modelShader.Activate();
+		camera.Matrix(modelShader, "camMatrix");
+		backpack.Draw(modelShader);
 
 		glDepthFunc(GL_LEQUAL);
 		skyBoxShader.Activate();

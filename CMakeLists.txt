@@ -38,11 +38,20 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
+# ------------------------------------------------------------------------------------- Adding assimp --------------------------------------------------------------------------------------------------------------
+FetchContent_Declare(
+        assimp
+        GIT_REPOSITORY https://github.com/assimp/assimp.git
+        GIT_TAG 8b9ed34eaa3e6ad24254cb7e058fb9150f66b865 #refs/tag/v5.4.0
+)
+FetchContent_MakeAvailable(assimp)
+
 # Add source to this project's executable.
 add_executable (
     ThemeParkSim
     "ThemeParkSim.cpp"
-    "Mesh.h" "Mesh.cpp" 
+    "ModelMesh.h"  
+    "mesh.h" "mesh.cpp"
     "VAO.h" "VAO.cpp" 
     "EBO.h" "EBO.cpp" 
     "Camera.h" "Camera.cpp" 
@@ -51,6 +60,7 @@ add_executable (
     "shaderClass.h" "shaderClass.cpp"
     "stb_image.h"
     "stb.cpp"
+    "Model.h"
 )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
@@ -60,6 +70,6 @@ endif()
 # TODO: Add tests and install targets if needed.
 
 # ---------------------------------------------------------------------------------------- Linking libraries together --------------------------------------------------------------------------------------------------
-target_link_libraries(ThemeParkSim glm::glm glfw glad)
+target_link_libraries(ThemeParkSim glm::glm glfw glad assimp)
 
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})
