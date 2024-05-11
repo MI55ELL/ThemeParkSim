@@ -6,8 +6,8 @@
 
 
 
-const unsigned int width = 800;
-const unsigned int height = 800;
+const unsigned int width = 1000;
+const unsigned int height = 1000;
 
 
 
@@ -106,7 +106,7 @@ int main()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Create a GLFWwindow object of 800 by 800 pixels, naming it "YoutubeOpenGL"
-	GLFWwindow* window = glfwCreateWindow(width, height, "iceRide", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, "Hook A Duck", NULL, NULL);
 	// Error check if the window fails to create
 	if (window == NULL)
 	{
@@ -123,7 +123,7 @@ int main()
 	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
 	glViewport(0, 0, width, height);
 
-	// Original code from the tutorial
+	
 	Texture textures[]
 	{
 		Texture("resources/textures/grass.png", "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
@@ -182,8 +182,8 @@ int main()
 
 	// model loading 
 	stbi_set_flip_vertically_on_load(true);
-	Model backpack("resources/models/dragon/DragonModel.obj");
-
+	Model duck("resources/models/duck/Duck.obj");
+	Model bathTub("resources/models/bathtub/water.obj");
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
 
@@ -271,6 +271,7 @@ int main()
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
+
 	{
 		// Specify the color of the background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
@@ -289,7 +290,8 @@ int main()
 		//light.Draw(lightShader, camera);
 		modelShader.Activate();
 		camera.Matrix(modelShader, "camMatrix");
-		backpack.Draw(modelShader);
+		duck.Draw(modelShader);
+		bathTub.Draw(modelShader);
 
 		glDepthFunc(GL_LEQUAL);
 		skyBoxShader.Activate();
