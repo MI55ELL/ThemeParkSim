@@ -35,9 +35,13 @@ public:
     bool gammaCorrection;
 
     // constructor, expects a filepath to a 3D model.
-    Model(string const& path, bool gamma = false) : gammaCorrection(gamma)
+    Model(string const& path, bool flipuvs = false, bool gamma = false) : gammaCorrection(gamma)
     {
-        loadModel(path);
+        loadModel
+        (
+            path,
+            (flipuvs) ? aiProcess_FlipUVs : 0
+        );
     }
 
     // draws the model, and thus all its meshes
@@ -49,11 +53,11 @@ public:
 
 private:
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-    void loadModel(string const& path)
+    void loadModel(string const& path, unsigned int pFlags)
     {
         // read file via ASSIMP
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+        const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | pFlags);
         // check for errors
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
         {

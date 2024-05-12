@@ -14,10 +14,10 @@ const unsigned int height = 1000;
 // Vertices coordinates
 Vertex vertices[] =
 { //               COORDINATES           /            COLORS          /           NORMALS         /       TEXTURE COORDINATES    //
-	Vertex{glm::vec3(-1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)},
-	Vertex{glm::vec3(-1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)},
-	Vertex{glm::vec3(1.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)},
-	Vertex{glm::vec3(1.0f, 0.0f,  1.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)}
+	Vertex{glm::vec3(-1.0f, -0.0f,  1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f)},
+	Vertex{glm::vec3(-1.0f, -0.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 1.0f)},
+	Vertex{glm::vec3(1.0f, -0.0f, -1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)},
+	Vertex{glm::vec3(1.0f, -0.0f,  1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)}
 };
 
 // Indices for vertices order
@@ -182,8 +182,11 @@ int main()
 
 	// model loading 
 	stbi_set_flip_vertically_on_load(true);
-	Model duck("resources/models/duck/Duck.obj");
-	Model bathTub("resources/models/bathtub/water.obj");
+	// Model duck1("resources/models/duck/duck.obj", 0);
+	// Model duck2("resources/models/duck/duck.obj", 0);
+	// Model bathTub("resources/models/duck/fishingDucks/environment.obj");
+
+
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
 
@@ -201,7 +204,6 @@ int main()
 	// element buffer object - holds indices
 	glGenBuffers(1, &skyBoxEBO);
 	// setting the VAO array to be the current object puttin it into global context so everything can modify it 
-	glBindVertexArray(skyBoxVAO);
 	// giving the buffer object a type of gl_array_buffer, so it knows how to handel the skyBox vertices
 	glBindBuffer(GL_ARRAY_BUFFER, skyBoxVBO);
 	// binds data of the VBO (vertices) with the VAO so makes the array of the VAO hold the pointer to the vertex buffer object (the indices)
@@ -286,13 +288,15 @@ int main()
 
 
 		// Draws different meshes
-		floor.Draw(shaderProgram, camera);
+		// floor.Draw(shaderProgram, camera);
 		//light.Draw(lightShader, camera);
 		modelShader.Activate();
 		camera.Matrix(modelShader, "camMatrix");
-		duck.Draw(modelShader);
-		bathTub.Draw(modelShader);
+		// duck1.Draw(modelShader);
+		// duck2.Draw(modelShader);
+		// bathTub.Draw(modelShader);
 
+		
 		glDepthFunc(GL_LEQUAL);
 		skyBoxShader.Activate();
 		glm::mat4 view = glm::mat4(1.0f);
@@ -310,7 +314,6 @@ int main()
 
 		glDepthFunc(GL_LESS);
 
-
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
 		// Take care of all GLFW events
@@ -322,6 +325,7 @@ int main()
 	// Delete all the objects we've created
 	shaderProgram.Delete();
 	lightShader.Delete();
+	skyBoxShader.Delete();
 	// Delete window before ending the program
 	glfwDestroyWindow(window);
 	// Terminate GLFW before ending the program
