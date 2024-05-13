@@ -46,6 +46,30 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(assimp)
 
+#-------------------------------------------------------------------------------------Adding IMGUI ----------------------------------------------------------------------------------------------------------
+FetchContent_Declare(
+        imgui
+        GIT_REPOSITORY https://github.com/ocornut/imgui.git
+        GIT_TAG 231cbee0fc4f59dbe5b8b853a11b08dc84e57c65 #refs/tags/v1.90.5
+)
+FetchContent_MakeAvailable(imgui)
+file(GLOB imgui_SRC ${imgui_SOURCE_DIR}/*.cpp ${imgui_SOURCE_DIR}/*.h)
+add_library(
+        imgui
+        ${imgui_SRC}
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.h
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.h
+)
+target_link_libraries(imgui PUBLIC glad glfw)
+target_include_directories(
+        imgui
+        PUBLIC
+        ${imgui_SOURCE_DIR}
+        ${imgui_SOURCE_DIR}/backends
+)
+
 # Add source to this project's executable.
 add_executable (
     ThemeParkSim
@@ -61,7 +85,7 @@ add_executable (
     "stb_image.h"
     "stb.cpp"
     "Model.h"
-)
+ "Duck.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET ThemeParkSim PROPERTY CXX_STANDARD 20)
@@ -70,6 +94,6 @@ endif()
 # TODO: Add tests and install targets if needed.
 
 # ---------------------------------------------------------------------------------------- Linking libraries together --------------------------------------------------------------------------------------------------
-target_link_libraries(ThemeParkSim glm::glm glfw glad assimp)
+target_link_libraries(ThemeParkSim glm::glm glfw glad assimp imgui)
 
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR})

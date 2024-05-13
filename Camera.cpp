@@ -33,42 +33,123 @@ void Camera::Matrix(Shader& shader, const char* uniform)
 void Camera::Inputs(GLFWwindow* window)
 {
 	// Handles key inputs
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	
+	//p pressed to enter first person view
+	if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
 	{
-		Position += speed * Orientation;
+		 PPressed = true;
 	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+	// p is now true so it enters first person mode
+	if (PPressed)
 	{
-		Position += speed * -glm::normalize(glm::cross(Orientation, Up));
+		// where if the user tries to move up and down the speed is set to 0 meaning they cannot move up and down from their sparw point 
+		if ((glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS))
+		{
+			speed = 0;
+			std::cout << "   x= " << Position.x << "       z= " << Position.z << std::endl;
+		}
+
+		//		x			z
+		// (-18.0122, -24.3686)
+		// ( 16.1871, -24.7544)
+		// ( 16.0207,  9.24621)
+		// (-18.5137,  9.29644)
+		
+		if ((Position.x < -18) || (Position.x > 16))
+		{
+			speed = 0.2;
+			Position += speed * -Up;
+			
+		}
+		
+		if ((Position.z < -24) || (Position.z > 9)) 
+		{
+			speed = 0.2;
+			Position += speed * -Up;
+		}
+		if ((Position.y < -3) || (Position.y > 5))
+		{
+			speed = 0.2;
+			Position += speed * -Up;
+		}
+		////		x			z
+		// (-8.567934, -2.71143)
+		// (-8.62208, -13.4118)
+		// ( 9.12965, -13.2812)
+		// ( 8.17749,  -2.50703)
+		//if (((Position.x > -8) && (Position.x < 8)) && ((Position.z > -13) && (Position.z < -2)))
+		//{
+			
+		//}
+	
+
+		// TODO: - implement jump
+		// TODO: - implement collisions with floor 
+		// if o is pressed the camera will leave first person mode and instead use free camera mode
+		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+		{
+			PPressed = false;
+		}
+		auto newOrientation = Orientation;
+		newOrientation.y = 0;
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			Position += speed * newOrientation;
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			Position += speed * -glm::normalize(glm::cross(newOrientation, Up));
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			Position += speed * -newOrientation;
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			Position += speed * glm::normalize(glm::cross(newOrientation, Up));
+		}
+
 	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+	else 
 	{
-		Position += speed * -Orientation;
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			Position += speed * Orientation;
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			Position += speed * -glm::normalize(glm::cross(Orientation, Up));
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			Position += speed * -Orientation;
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			Position += speed * glm::normalize(glm::cross(Orientation, Up));
+		}
+		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+		{
+			Position += speed * Up;
+		}
+		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		{
+			Position += speed * -Up;
+		}
+		if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
+		{
+			speed = 0.4f;
+		}
+		else if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_RELEASE)
+		{
+			speed = 0.2f;
+		}
 	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		Position += speed * glm::normalize(glm::cross(Orientation, Up));
-	}
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-	{
-		Position += speed * Up;
-	}
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-	{
-		Position += speed * -Up;
-	}
-	if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
-	{
-		speed = 0.4f;
-	}
-	else if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_RELEASE)
-	{
-		speed = 0.1f;
-	}
+
 
 
 	// Handles mouse inputs
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
 	{
 		// Hides mouse cursor
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -106,11 +187,13 @@ void Camera::Inputs(GLFWwindow* window)
 		// Sets mouse cursor to the middle of the screen so that it doesn't end up roaming around
 		glfwSetCursorPos(window, (width / 2), (height / 2));
 	}
-	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
+	else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
 	{
 		// Unhides cursor since camera is not looking around anymore
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		// Makes sure the next time the camera looks around it doesn't jump
 		firstClick = true;
 	}
+	
+
 }

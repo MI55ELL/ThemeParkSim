@@ -10,6 +10,8 @@ uniform mat4 camMatrix;
 
 void main()
 {
+    // stores texture coordinates of the thing we are storing
     TexCoords = aTexCoords;    
+    // model stores position and rotation of the model we are storing 
     gl_Position = camMatrix * model * vec4(aPos, 1.0);
 }

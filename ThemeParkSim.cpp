@@ -1,11 +1,24 @@
 ﻿#include"ModelMesh.h"
 #include"mesh.h"
 #include"Model.h"
+#include"Duck.h"
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 
-
+// sets an initial window width and height, this can and will be changes if the user changes the size of their screen 
 const unsigned int width = 1000;
 const unsigned int height = 1000;
+
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void screenResize(GLFWwindow* window, int width, int height)
+{
+	// make sure the viewport matches the new window dimensions; note that width and 
+	// height will be significantly larger than specified on retina displays.
+	glViewport(0, 0, width, height);
+}
 
 
 
@@ -24,6 +37,7 @@ GLuint indices[] =
 	0, 1, 2,
 	0, 2, 3
 };
+
 
 
 Vertex lightVertices[] =
@@ -89,9 +103,9 @@ GLuint lightIndices[] =
 	4, 6, 7
 };
 
-
 int main()
 {
+	
 	// Initialize GLFW
 	glfwInit();
 
@@ -115,11 +129,10 @@ int main()
 	// Introduce the window into the current context
 	glfwMakeContextCurrent(window);
 
+	glfwSetFramebufferSizeCallback(window, screenResize);
+
 	// Load GLAD so it configures OpenGL
 	gladLoadGL();
-	// Specify the viewport of OpenGL in the Window
-	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
-	glViewport(0, 0, width, height);
 
 
 	Texture textures[]
@@ -129,17 +142,18 @@ int main()
 	};
 
 
-
 	// Generates Shader object using shaders default.vert and default.frag
 	Shader shaderProgram("resources/shaders/default.vert", "resources/shaders/default.frag");
 	Shader skyBoxShader("resources/shaders/skyBox.vert", "resources/shaders/skyBox.frag");
 	Shader modelShader("resources/shaders/modelShader.vert", "resources/shaders/modelShader.frag");
+	
 	// Store mesh data in vectors for the mesh
 	std::vector <Vertex> verts(vertices, vertices + sizeof(vertices) / sizeof(Vertex));
 	std::vector <GLuint> ind(indices, indices + sizeof(indices) / sizeof(GLuint));
 	std::vector <Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
 	// Create floor mesh
 	Mesh floor(verts, ind, tex);
+	
 
 
 
@@ -180,13 +194,14 @@ int main()
 
 	// model loading 
 	stbi_set_flip_vertically_on_load(true);
-	Model duck("resources/models/duck/Duck.obj");
-	Model bathTub("resources/models/bathtub/water.obj");
+	Model duck("resources/models/duck/lowPolyDuck/lowPolyDuck.obj");
+	Model pool("resources/models/duckPool/scene.obj");
+
 	// Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
 
-	// Creates camera object
-	Camera camera(width, height, glm::vec3(0.0f, 0.0f, 2.0f));
+	// Creating a camera object and settign its intital start position, width of screen and height of screen 
+	Camera camera(width, height, glm::vec3(0.0f, 5.0f, 0.0f));
 
 	unsigned int skyBoxVAO, skyBoxVBO, skyBoxEBO;
 	// passing number of generated vertex arrays and passing where we want it to be stored 
@@ -266,6 +281,24 @@ int main()
 		}
 	}
 
+	// Initialise before loop
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+
+	Duck idolDuck{ glm::vec3(50.0f, 30.0f, -9.0f), 2.0f, -40.0f}; 
+	Duck Duck1{ glm::vec3(-5.0f, -2.0f, -14.0f), 0.4f, 0.0f};
+	Duck Duck2{ glm::vec3(5.0f, -2.0f, -14.0f), 0.4f, 0.0f};
+	Duck Duck3{ glm::vec3(0.0f, -2.0f, -14.0f), 0.4f, 0.0f};
+
+	struct {
+		glm::vec3 position;
+		glm::float32 radius;
+		glm::float32 angle;
+		uint count;
+	} TeaCup;
+
 
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
@@ -284,12 +317,27 @@ int main()
 
 
 		// Draws different meshes
-		floor.Draw(shaderProgram, camera);
+		// floor.Draw(shaderProgram, camera);
 		//light.Draw(lightShader, camera);
 		modelShader.Activate();
 		camera.Matrix(modelShader, "camMatrix");
+		// drawing objects 
+		pool.Draw(modelShader);
+		idolDuck.Matrix(modelShader, "model");
 		duck.Draw(modelShader);
-		bathTub.Draw(modelShader);
+		Duck1.Matrix(modelShader, "model");
+		duck.Draw(modelShader);
+		Duck2.Matrix(modelShader, "model");
+		duck.Draw(modelShader);
+		Duck3.Matrix(modelShader, "model");
+		duck.Draw(modelShader);
+
+		Duck1.RaceDuck();
+		Duck2.RaceDuck();
+		Duck3.RaceDuck();
+
+		glUniformMatrix4fv(glGetUniformLocation(modelShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
+
 
 		glDepthFunc(GL_LEQUAL);
 		skyBoxShader.Activate();
@@ -308,6 +356,14 @@ int main()
 
 		glDepthFunc(GL_LESS);
 
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		ImGui::DragFloat3("Position", glm::value_ptr(Duck3.position));
+		ImGui::InputFloat("scale", &Duck3.scale);
+		ImGui::InputFloat("angle", &Duck3.angle);
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// Swap the back buffer with the front buffer
 		glfwSwapBuffers(window);
